@@ -1,5 +1,6 @@
 use clap::Parser;
 use java2rs::process;
+use std::fs;
 
 /// java2rs command line arguments
 #[derive(Parser, Debug)]
@@ -12,5 +13,6 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    process(args.input_dir);
+    let input = fs::read_to_string(args.input_dir).unwrap();
+    process(&input);
 }

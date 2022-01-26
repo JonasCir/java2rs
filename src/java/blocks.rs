@@ -1,9 +1,9 @@
+use crate::ir::block::Block;
 use crate::java::expressions::handle_expression_statement;
-use crate::java::utils::*;
 use tree_sitter::TreeCursor;
 
 #[must_use]
-pub fn handle_block(cursor: &mut TreeCursor) -> String {
+pub fn handle_block(cursor: &mut TreeCursor, code: &str) -> Block {
     let block = cursor.node();
     assert_eq!(block.kind(), "block");
     assert!(block.next_sibling().is_none());
@@ -11,11 +11,16 @@ pub fn handle_block(cursor: &mut TreeCursor) -> String {
     assert_eq!(block.named_child_count(), 1);
 
     assert!(cursor.goto_first_child());
-    //eat {
-    assert!(cursor.goto_next_sibling());
-    let stmt = handle_expression_statement(cursor);
-    //assert!(cursor.goto_parent());
+    assert_eq!(cursor.node().kind(), "{");
 
-    //assert_eq!(cursor.node().kind(), "block");
-    stmt
+    assert!(cursor.goto_next_sibling());
+    let stmt = handle_expression_statement(cursor, code);
+
+    assert!(cursor.goto_next_sibling());
+    assert_eq!(cursor.node().kind(), "}");
+
+    assert!(cursor.goto_parent());
+    assert_eq!(cursor.node().kind(), "block");
+
+    vec![stmt]
 }

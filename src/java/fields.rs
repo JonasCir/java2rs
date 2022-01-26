@@ -1,18 +1,23 @@
 use crate::java::identifiers::handle_identifier;
-use crate::java::utils::print_children;
 use tree_sitter::TreeCursor;
 
-pub fn handle_field_access(cursor: &mut TreeCursor) -> String {
+pub fn handle_field_access(cursor: &mut TreeCursor, code: &str) -> String {
     let field_access = cursor.node();
     assert_eq!(field_access.kind(), "field_access");
     assert_eq!(field_access.next_sibling().unwrap().kind(), ".");
     assert_eq!(field_access.child_count(), 3);
 
-    field_access
+    // todo the iteration in this method somehow breaks the cursor, so we need to create a new one
+    //  before calling this function for now
+    let access_str = field_access
         .named_children(cursor)
         .collect::<Vec<_>>()
         .iter()
-        .map(handle_identifier)
+        .map(|c| -> String { handle_identifier(c, code) })
         .intersperse('.'.to_string())
-        .collect()
+        .collect();
+
+    assert!(cursor.goto_parent());
+    assert_eq!(cursor.node().kind(), "field_access");
+    access_str
 }
