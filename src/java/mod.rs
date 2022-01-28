@@ -20,12 +20,6 @@ pub mod utils {
     /// * `code`: The source file content.
     ///
     /// returns: ()
-    ///
-    /// # Examples
-    ///
-    /// ```
-    ///
-    /// ```
     #[allow(dead_code)]
     pub fn text_print(node: &Node, code: &str) {
         println!(
@@ -47,12 +41,6 @@ pub mod utils {
     /// * `code`:
     ///
     /// returns: ()
-    ///
-    /// # Examples
-    ///
-    /// ```
-    ///
-    /// ```
     #[allow(dead_code)]
     pub fn print_children(cursor: &mut TreeCursor, code: &str) {
         for child in cursor.node().children(cursor) {
@@ -70,12 +58,6 @@ pub mod utils {
     /// * `code`:
     ///
     /// returns: ()
-    ///
-    /// # Examples
-    ///
-    /// ```
-    ///
-    /// ```
     #[allow(dead_code)]
     pub fn print_siblings(node: Node, code: &str) {
         let mut current = node;
