@@ -4,13 +4,24 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# easy CLI parsing
 clap = { version = "3.0.7", features = ["derive"] }
+
+# java parsing
 tree-sitter = "0.19"
 tree-sitter-java = "0.19.0"
+
+# code generation
 syn = "1.0.86"
 quote = "1.0.15"
 proc-macro2 = { version = "1.0.32", default-features = false }
 prettyplease = "0.1.2"
+
+# Readable contracts
+contracts = "0.6.2"
+
+# Convinient working with enums
+strum = { version = "0.23", features = ["derive"] }
 
 [dev-dependencies]
 pretty_assertions = "1.0.0"

@@ -1,9 +1,10 @@
 use crate::java::identifiers::handle_identifier;
 use tree_sitter::TreeCursor;
 
+#[must_use]
+#[invariant(cursor.node().kind() == "field_access")]
 pub fn handle_field_access(cursor: &mut TreeCursor, code: &str) -> String {
     let field_access = cursor.node();
-    assert_eq!(field_access.kind(), "field_access");
     assert_eq!(field_access.next_sibling().unwrap().kind(), ".");
     assert_eq!(field_access.child_count(), 3);
 
@@ -18,6 +19,5 @@ pub fn handle_field_access(cursor: &mut TreeCursor, code: &str) -> String {
         .collect();
 
     assert!(cursor.goto_parent());
-    assert_eq!(cursor.node().kind(), "field_access");
     access_str
 }

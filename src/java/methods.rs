@@ -9,9 +9,9 @@ use crate::java::types::*;
 use tree_sitter::TreeCursor;
 
 #[must_use]
+#[invariant(cursor.node().kind() == "method_declaration")]
 pub fn handle_method_declaration(cursor: &mut TreeCursor, code: &str) -> MethodDeclaration {
     let method_declaration = cursor.node();
-    assert_eq!(method_declaration.kind(), "method_declaration");
     assert!(method_declaration.next_named_sibling().is_none());
     assert_eq!(method_declaration.child_count(), 5);
 
@@ -31,7 +31,6 @@ pub fn handle_method_declaration(cursor: &mut TreeCursor, code: &str) -> MethodD
     let method_body = handle_block(cursor, code);
 
     assert!(cursor.goto_parent());
-    assert_eq!(cursor.node().kind(), "method_declaration");
 
     MethodDeclaration::new(
         method_name,
@@ -43,9 +42,9 @@ pub fn handle_method_declaration(cursor: &mut TreeCursor, code: &str) -> MethodD
 }
 
 #[must_use]
+#[invariant(cursor.node().kind() == "formal_parameters")]
 pub fn handle_formal_parameters(cursor: &mut TreeCursor, code: &str) -> Vec<Parameter> {
     let formal_parameters = cursor.node();
-    assert_eq!(formal_parameters.kind(), "formal_parameters");
     assert!(
         formal_parameters.next_named_sibling().is_none()
             || formal_parameters.next_named_sibling().unwrap().kind() == "block"
@@ -63,14 +62,13 @@ pub fn handle_formal_parameters(cursor: &mut TreeCursor, code: &str) -> Vec<Para
     assert_eq!(cursor.node().kind(), ")");
 
     assert!(cursor.goto_parent());
-    assert_eq!(cursor.node().kind(), "formal_parameters");
     vec![parameter]
 }
 
 #[must_use]
+#[invariant(cursor.node().kind() == "formal_parameter")]
 pub fn handle_formal_parameter(cursor: &mut TreeCursor, code: &str) -> Parameter {
     let formal_parameter = cursor.node();
-    assert_eq!(formal_parameter.kind(), "formal_parameter");
     assert_eq!(formal_parameter.next_sibling().unwrap().kind(), ")");
     assert_eq!(formal_parameter.child_count(), 2);
     assert_eq!(formal_parameter.named_child_count(), 2);
@@ -78,19 +76,18 @@ pub fn handle_formal_parameter(cursor: &mut TreeCursor, code: &str) -> Parameter
     assert!(cursor.goto_first_child());
     let array_type = handle_array_type(cursor, code);
     let ty = Type::Array(array_type);
+
     assert!(cursor.goto_next_sibling());
     let parameter_name = handle_identifier(&formal_parameter.named_child(1).unwrap(), code);
 
     assert!(cursor.goto_parent());
-    assert_eq!(cursor.node().kind(), "formal_parameter");
-
     Parameter::new(parameter_name, ty)
 }
 
 #[must_use]
+#[invariant(cursor.node().kind() == "method_invocation")]
 pub fn handle_method_invocation(cursor: &mut TreeCursor, code: &str) -> MethodInvocation {
     let method_invocation = cursor.node();
-    assert_eq!(method_invocation.kind(), "method_invocation");
     assert_eq!(method_invocation.next_sibling().unwrap().kind(), ";");
     assert_eq!(method_invocation.child_count(), 4);
     assert_eq!(method_invocation.named_child_count(), 3);
@@ -111,15 +108,13 @@ pub fn handle_method_invocation(cursor: &mut TreeCursor, code: &str) -> MethodIn
     let arguments = handle_argument_list(cursor, code);
 
     assert!(cursor.goto_parent());
-    assert_eq!(cursor.node().kind(), "method_invocation");
-
     MethodInvocation::new(field_access, identifier, arguments)
 }
 
 #[must_use]
+#[invariant(cursor.node().kind() == "argument_list")]
 pub fn handle_argument_list(cursor: &mut TreeCursor, code: &str) -> Arguments {
     let argument_list = cursor.node();
-    assert_eq!(argument_list.kind(), "argument_list");
     assert!(argument_list.next_sibling().is_none());
     assert_eq!(argument_list.child_count(), 3);
     assert_eq!(argument_list.named_child_count(), 1);
@@ -134,7 +129,5 @@ pub fn handle_argument_list(cursor: &mut TreeCursor, code: &str) -> Arguments {
     assert_eq!(cursor.node().kind(), ")");
 
     assert!(cursor.goto_parent());
-    assert_eq!(cursor.node().kind(), "argument_list");
-
     vec![string_literal]
 }

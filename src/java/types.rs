@@ -3,22 +3,22 @@ use crate::java::identifiers::handle_type_identifier;
 use crate::java::utils::text;
 use tree_sitter::{Node, TreeCursor};
 
+#[must_use]
+#[requires(void_type.kind() == "void_type")]
+#[ensures(ret == ScalarType::Void)]
 pub fn handle_void_type(void_type: &Node) -> ScalarType {
-    assert_eq!(void_type.kind(), "void_type");
     assert_eq!(void_type.next_sibling().unwrap().kind(), "identifier");
-    assert_eq!(void_type.child_count(), 0);
     ScalarType::Void
 }
 
+#[must_use]
+#[requires(dimensions.kind() == "dimensions")]
+#[ensures(ret.start() == 0 && ret.end() == 0)]
 pub fn handle_dimensions(dimensions: &Node, code: &str) -> Dimensions {
-    assert_eq!(dimensions.kind(), "dimensions");
     assert!(dimensions.next_sibling().is_none());
+    assert_eq!(dimensions.child_count(), 2);
     assert_eq!(dimensions.named_child_count(), 0);
-    let dim = text(dimensions, code);
-    assert_eq!(dim, "[]");
-    let res = Dimensions::default();
-    assert!(res.start == 0 && res.end == 0);
-    res
+    text(dimensions, code).parse().unwrap()
 }
 
 #[must_use]

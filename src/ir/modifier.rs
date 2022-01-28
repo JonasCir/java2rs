@@ -1,4 +1,4 @@
-use crate::codegen::rust::RustCodegen;
+use crate::codegen::RustCodegen;
 use proc_macro2::TokenStream;
 pub struct Modifier {
     visibility: Visibility,
