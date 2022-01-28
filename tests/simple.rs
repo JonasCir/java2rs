@@ -1,6 +1,8 @@
 mod common;
+
 use crate::common::assert_code_equality;
 use java2rs::process;
+
 #[test]
 fn test_simple_main_class() {
     let input = r#"
