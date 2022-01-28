@@ -1,4 +1,4 @@
-use crate::codegen::rust::RustCodegen;
+use crate::codegen::RustCodegen;
 use crate::ir::expression::Expression;
 use proc_macro2::TokenStream;
 pub enum Statement {

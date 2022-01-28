@@ -6,9 +6,9 @@ use crate::java::modifiers::*;
 use tree_sitter::{Node, TreeCursor};
 
 #[must_use]
+#[invariant(cursor.node().kind() == "class_declaration")]
 pub fn handle_class_declaration(cursor: &mut TreeCursor, code: &str) -> Class {
     let class_declaration = cursor.node();
-    assert_eq!(class_declaration.kind(), "class_declaration");
     assert!(class_declaration.next_sibling().is_none());
     assert_eq!(class_declaration.child_count(), 4);
 
@@ -26,17 +26,22 @@ pub fn handle_class_declaration(cursor: &mut TreeCursor, code: &str) -> Class {
     let (methods, static_methods) = handle_class_body(cursor, code);
 
     assert!(cursor.goto_parent());
-    assert_eq!(cursor.node().kind(), "class_declaration");
     Class::new(class_name, modifiers, methods, static_methods)
 }
 
+pub fn handle_class(class: &Node) {
+    assert_eq!(class.kind(), "class");
+    assert_eq!(class.next_sibling().unwrap().kind(), "identifier");
+    assert_eq!(class.child_count(), 0);
+}
+
 #[must_use]
+#[invariant(cursor.node().kind() == "class_body")]
 pub fn handle_class_body(
     cursor: &mut TreeCursor,
     code: &str,
 ) -> (Vec<MethodDeclaration>, Vec<MethodDeclaration>) {
     let class_body = cursor.node();
-    assert_eq!(class_body.kind(), "class_body");
     assert!(class_body.next_sibling().is_none());
     assert_eq!(class_body.child_count(), 3);
     assert_eq!(class_body.named_child_count(), 1);
@@ -52,17 +57,10 @@ pub fn handle_class_body(
     assert_eq!(cursor.node().kind(), "}");
 
     assert!(cursor.goto_parent());
-    assert_eq!(cursor.node().kind(), "class_body");
 
     // static methods need to be moved out of the class to dedicated impl block, so create a tuple for
     // static and member functions
     let methods = vec![];
     let static_methods = vec![method_decl];
     (methods, static_methods)
-}
-
-pub fn handle_class(class: &Node) {
-    assert_eq!(class.kind(), "class");
-    assert_eq!(class.next_sibling().unwrap().kind(), "identifier");
-    assert_eq!(class.child_count(), 0);
 }

@@ -1,4 +1,4 @@
-use crate::codegen::rust::RustCodegen;
+use crate::codegen::RustCodegen;
 use crate::ir::block::Block;
 use crate::ir::modifier::Modifier;
 use crate::ir::modifier::Visibility;
@@ -39,7 +39,7 @@ impl MethodDeclaration {
             && *self.parameters.get(0).unwrap()
                 == Parameter {
                     name: "args".to_string(),
-                    ty: Type::Array(ArrayType::new(ScalarType::String, Dimensions::default())),
+                    ty: Type::Array(ArrayType::new(ScalarType::String, Dimensions::empty())),
                 }
     }
 }

@@ -1,4 +1,4 @@
-use crate::codegen::rust::RustCodegen;
+use crate::codegen::RustCodegen;
 use crate::ir::class::Class;
 use proc_macro2::TokenStream;
 

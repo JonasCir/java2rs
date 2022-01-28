@@ -1,11 +1,16 @@
 #![feature(assert_matches)]
 #![feature(iter_intersperse)]
 
+#[macro_use]
+extern crate contracts;
+#[macro_use]
+extern crate strum;
+
 mod codegen;
 mod ir;
 mod java;
 
-use crate::codegen::rust::RustCodegen;
+use crate::codegen::RustCodegen;
 use crate::java::programs::handle_program;
 use tree_sitter::{Parser, Tree, TreeCursor};
 

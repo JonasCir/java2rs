@@ -3,9 +3,10 @@ use crate::ir::statement::Statement;
 use crate::java::methods::handle_method_invocation;
 use tree_sitter::TreeCursor;
 
+#[must_use]
+#[invariant(cursor.node().kind() == "expression_statement")]
 pub fn handle_expression_statement(cursor: &mut TreeCursor, code: &str) -> Statement {
     let exp_statement = cursor.node();
-    assert_eq!(exp_statement.kind(), "expression_statement");
     assert!(
         exp_statement.next_sibling().is_none()
             || exp_statement.next_sibling().unwrap().kind() == "}"
@@ -19,7 +20,6 @@ pub fn handle_expression_statement(cursor: &mut TreeCursor, code: &str) -> State
     assert_eq!(cursor.node().kind(), ";");
 
     assert!(cursor.goto_parent());
-    assert_eq!(cursor.node().kind(), "expression_statement");
 
     Statement::Expression(Expression::MethodInvocation(method_invocation))
 }
