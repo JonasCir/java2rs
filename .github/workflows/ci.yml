@@ -4,7 +4,6 @@ on: [ push, pull_request ]
 
 env:
   TOOLCHAIN_CHANNEL: nightly
-  CARGO_TERM_COLOR: always
 
 jobs:
   ci:
@@ -31,7 +30,7 @@ jobs:
             ~/.cargo/registry/
             ~/.cargo/git/
             target/
-          key: ${{ runner.os }}-cargo-${{ env.TOOLCHAIN_CHANNEL }}-${{ hashFiles('**/Cargo.toml') }}
+          key: ${{ runner.os }}-cargo-${{ env.TOOLCHAIN_CHANNEL }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run cargo build
         uses: actions-rs/cargo@v1
@@ -49,8 +48,17 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: -- -D warnings
 
-      - name: Run cargo fmt
+      - name: Run cargo fmt on java2rs
         uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --all -- --check
+
+      - name: Gather test resources
+        run: echo "TEST_RESOURCES_RUST=$(ls tests/resources/**/*.rs | tr '\n' ' ')" >> $GITHUB_ENV
+
+      - name: Run cargo fmt on tests resources
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: -- ${{ env.TEST_RESOURCES_RUST }} --check
