@@ -13,4 +13,4 @@ impl RustCodegen for Statement {
     }
 }
 
-pub(crate) type Statements = Vec<Statement>;
+pub type Statements = Vec<Statement>;
