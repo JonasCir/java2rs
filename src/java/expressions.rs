@@ -4,7 +4,7 @@ use tree_sitter::TreeCursor;
 
 #[must_use]
 #[invariant(cursor.node().kind() == "expression_statement")]
-pub fn handle_expression_statement(cursor: &mut TreeCursor, code: &str) -> ir::Statement {
+pub fn handle_expression_statement(cursor: &mut TreeCursor, code: &str) -> ir::ExpressionStatement {
     let exp_statement = cursor.node();
     assert!(
         exp_statement.next_sibling().is_none()
@@ -20,5 +20,5 @@ pub fn handle_expression_statement(cursor: &mut TreeCursor, code: &str) -> ir::S
 
     assert!(cursor.goto_parent());
 
-    ir::Statement::Expression(ir::Expression::MethodInvocation(method_invocation))
+    ir::ExpressionStatement::MethodInvocation(method_invocation)
 }

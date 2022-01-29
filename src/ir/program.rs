@@ -1,13 +1,13 @@
 use crate::codegen::RustCodegen;
-use crate::ir::class::Class;
+use crate::ir::class::ClassDeclaration;
 use proc_macro2::TokenStream;
 
 pub struct Program {
-    class: Class,
+    class: ClassDeclaration,
 }
 
 impl Program {
-    pub fn new(class: Class) -> Self {
+    pub fn new(class: ClassDeclaration) -> Self {
         Program { class }
     }
 }

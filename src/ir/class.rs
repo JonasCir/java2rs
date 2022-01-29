@@ -5,15 +5,15 @@ use crate::ir::{Parameter, Statements};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
-pub struct Class {
+pub struct ClassDeclaration {
     name: String,
     modifier: Modifier,
     body: ClassBody,
 }
 
-impl Class {
+impl ClassDeclaration {
     pub fn new(name: String, modifier: Modifier, body: ClassBody) -> Self {
-        Class {
+        ClassDeclaration {
             name,
             modifier,
             body,
@@ -21,7 +21,7 @@ impl Class {
     }
 }
 
-impl RustCodegen for Class {
+impl RustCodegen for ClassDeclaration {
     fn to_rust(&self) -> TokenStream {
         assert!(!self.modifier.static_access());
         let name = format_ident!("{}", &self.name);
@@ -59,12 +59,12 @@ impl RustCodegen for Class {
 }
 
 pub struct ClassBody {
-    constructor: Option<Constructor>,
+    constructor: Option<ConstructorDeclaration>,
     methods: MethodDeclarations,
 }
 
 impl ClassBody {
-    pub fn new(constructor: Option<Constructor>, methods: MethodDeclarations) -> Self {
+    pub fn new(constructor: Option<ConstructorDeclaration>, methods: MethodDeclarations) -> Self {
         ClassBody {
             constructor,
             methods,
@@ -72,19 +72,19 @@ impl ClassBody {
     }
 }
 
-pub struct Constructor {
+pub struct ConstructorDeclaration {
     modifier: Modifier,
     parameters: Vec<Parameter>,
     body_block: ConstructorBody,
 }
 
-impl Constructor {
+impl ConstructorDeclaration {
     pub fn new(
         modifier: Modifier,
         parameters: Vec<Parameter>,
         body_block: ConstructorBody,
     ) -> Self {
-        Constructor {
+        ConstructorDeclaration {
             modifier,
             parameters,
             body_block,
@@ -102,7 +102,7 @@ impl Constructor {
     }
 }
 
-impl RustCodegen for Constructor {
+impl RustCodegen for ConstructorDeclaration {
     fn to_rust(&self) -> TokenStream {
         assert!(self.parameters().is_empty());
 

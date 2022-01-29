@@ -9,7 +9,7 @@ use tree_sitter::{Node, TreeCursor};
 
 #[must_use]
 #[invariant(cursor.node().kind() == "class_declaration")]
-pub fn handle_class_declaration(cursor: &mut TreeCursor, code: &str) -> ir::Class {
+pub fn handle_class_declaration(cursor: &mut TreeCursor, code: &str) -> ir::ClassDeclaration {
     let class_declaration = cursor.node();
     assert!(class_declaration.next_sibling().is_none());
 
@@ -27,13 +27,13 @@ pub fn handle_class_declaration(cursor: &mut TreeCursor, code: &str) -> ir::Clas
     handle_class(&cursor.node());
 
     assert!(cursor.goto_next_sibling());
-    let class_name = handle_identifier(&cursor.node(), code);
+    let name = handle_identifier(&cursor.node(), code);
 
     assert!(cursor.goto_next_sibling());
-    let method_declarations = handle_class_body(cursor, code);
+    let class_body = handle_class_body(cursor, code);
 
     assert!(cursor.goto_parent());
-    ir::Class::new(class_name, modifiers, method_declarations)
+    ir::ClassDeclaration::new(name, modifiers, class_body)
 }
 
 pub fn handle_class(class: &Node) {
@@ -52,8 +52,9 @@ pub fn handle_class_body(cursor: &mut TreeCursor, code: &str) -> ir::ClassBody {
     assert!(cursor.goto_next_sibling());
 
     let mut method_declarations = ir::MethodDeclarations::new();
-    let mut constructor_declaration: Option<ir::Constructor> = None;
+    let mut constructor_declaration: Option<ir::ConstructorDeclaration> = None;
 
+    // grammar calls this class_body_declaration
     while cursor.node().kind() != "}" {
         match cursor.node().kind() {
             "method_declaration" => {
@@ -75,7 +76,10 @@ pub fn handle_class_body(cursor: &mut TreeCursor, code: &str) -> ir::ClassBody {
 
 #[must_use]
 #[invariant(cursor.node().kind() == "constructor_declaration")]
-pub fn handle_constructor_declaration(cursor: &mut TreeCursor, code: &str) -> ir::Constructor {
+pub fn handle_constructor_declaration(
+    cursor: &mut TreeCursor,
+    code: &str,
+) -> ir::ConstructorDeclaration {
     let constructor_declaration = cursor.node();
     assert_eq!(constructor_declaration.child_count(), 4);
 
@@ -93,7 +97,7 @@ pub fn handle_constructor_declaration(cursor: &mut TreeCursor, code: &str) -> ir
 
     assert!(cursor.goto_parent());
 
-    ir::Constructor::new(modifier, parameters, constructor_body)
+    ir::ConstructorDeclaration::new(modifier, parameters, constructor_body)
 }
 
 #[must_use]
@@ -107,8 +111,8 @@ pub fn handle_constructor_body(cursor: &mut TreeCursor, code: &str) -> ir::Const
 
     let mut statements = ir::Statements::new();
     while cursor.node().kind() != "}" {
-        let statement = handle_expression_statement(cursor, code);
-        statements.push(statement);
+        let expression_statement = handle_expression_statement(cursor, code);
+        statements.push(expression_statement);
         assert!(cursor.goto_next_sibling());
     }
 

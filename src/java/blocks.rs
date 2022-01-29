@@ -14,11 +14,11 @@ pub fn handle_block(cursor: &mut TreeCursor, code: &str) -> ir::Block {
     assert_eq!(cursor.node().kind(), "{");
 
     assert!(cursor.goto_next_sibling());
-    let stmt = handle_expression_statement(cursor, code);
+    let statements = handle_expression_statement(cursor, code);
 
     assert!(cursor.goto_next_sibling());
     assert_eq!(cursor.node().kind(), "}");
     assert!(cursor.goto_parent());
 
-    vec![stmt]
+    vec![statements]
 }
