@@ -1,18 +1,18 @@
-use crate::ir::method::{Arguments, MethodDeclaration, MethodInvocation, Parameter};
-use crate::ir::r#type::Type;
+use crate::ir;
+use crate::ir::Parameters;
 use crate::java::blocks::handle_block;
 use crate::java::fields::handle_field_access;
 use crate::java::identifiers::*;
 use crate::java::literals::handle_string_literal;
 use crate::java::modifiers::handle_modifiers;
 use crate::java::types::*;
+use crate::java::utils::{print_siblings, text_print};
 use tree_sitter::TreeCursor;
 
 #[must_use]
 #[invariant(cursor.node().kind() == "method_declaration")]
-pub fn handle_method_declaration(cursor: &mut TreeCursor, code: &str) -> MethodDeclaration {
+pub fn handle_method_declaration(cursor: &mut TreeCursor, code: &str) -> ir::MethodDeclaration {
     let method_declaration = cursor.node();
-    assert!(method_declaration.next_named_sibling().is_none());
     assert_eq!(method_declaration.child_count(), 5);
 
     assert!(cursor.goto_first_child());
@@ -32,42 +32,42 @@ pub fn handle_method_declaration(cursor: &mut TreeCursor, code: &str) -> MethodD
 
     assert!(cursor.goto_parent());
 
-    MethodDeclaration::new(
+    assert!(
+        modifier.static_access(),
+        "We allow only static method declarations for now"
+    );
+
+    ir::MethodDeclaration::new(
         method_name,
         modifier,
         parameters,
-        Type::Scalar(return_type),
+        ir::Type::Scalar(return_type),
         method_body,
     )
 }
 
 #[must_use]
 #[invariant(cursor.node().kind() == "formal_parameters")]
-pub fn handle_formal_parameters(cursor: &mut TreeCursor, code: &str) -> Vec<Parameter> {
-    let formal_parameters = cursor.node();
-    assert!(
-        formal_parameters.next_named_sibling().is_none()
-            || formal_parameters.next_named_sibling().unwrap().kind() == "block"
-    );
-    assert_eq!(formal_parameters.named_child_count(), 1);
-    assert_eq!(formal_parameters.child_count(), 3);
-
+pub fn handle_formal_parameters(cursor: &mut TreeCursor, code: &str) -> ir::Parameters {
     assert!(cursor.goto_first_child());
     assert_eq!(cursor.node().kind(), "(");
 
     assert!(cursor.goto_next_sibling());
-    let parameter = handle_formal_parameter(cursor, code);
 
-    assert!(cursor.goto_next_sibling());
-    assert_eq!(cursor.node().kind(), ")");
+    let mut parameters = Parameters::new();
+    while cursor.node().kind() != ")" {
+        let parameter = handle_formal_parameter(cursor, code);
+        parameters.push(parameter);
+        assert!(cursor.goto_next_sibling());
+    }
 
     assert!(cursor.goto_parent());
-    vec![parameter]
+    parameters
 }
 
 #[must_use]
 #[invariant(cursor.node().kind() == "formal_parameter")]
-pub fn handle_formal_parameter(cursor: &mut TreeCursor, code: &str) -> Parameter {
+pub fn handle_formal_parameter(cursor: &mut TreeCursor, code: &str) -> ir::Parameter {
     let formal_parameter = cursor.node();
     assert_eq!(formal_parameter.next_sibling().unwrap().kind(), ")");
     assert_eq!(formal_parameter.child_count(), 2);
@@ -75,18 +75,18 @@ pub fn handle_formal_parameter(cursor: &mut TreeCursor, code: &str) -> Parameter
 
     assert!(cursor.goto_first_child());
     let array_type = handle_array_type(cursor, code);
-    let ty = Type::Array(array_type);
+    let ty = ir::Type::Array(array_type);
 
     assert!(cursor.goto_next_sibling());
     let parameter_name = handle_identifier(&formal_parameter.named_child(1).unwrap(), code);
 
     assert!(cursor.goto_parent());
-    Parameter::new(parameter_name, ty)
+    ir::Parameter::new(parameter_name, ty)
 }
 
 #[must_use]
 #[invariant(cursor.node().kind() == "method_invocation")]
-pub fn handle_method_invocation(cursor: &mut TreeCursor, code: &str) -> MethodInvocation {
+pub fn handle_method_invocation(cursor: &mut TreeCursor, code: &str) -> ir::MethodInvocation {
     let method_invocation = cursor.node();
     assert_eq!(method_invocation.next_sibling().unwrap().kind(), ";");
     assert_eq!(method_invocation.child_count(), 4);
@@ -108,12 +108,12 @@ pub fn handle_method_invocation(cursor: &mut TreeCursor, code: &str) -> MethodIn
     let arguments = handle_argument_list(cursor, code);
 
     assert!(cursor.goto_parent());
-    MethodInvocation::new(field_access, identifier, arguments)
+    ir::MethodInvocation::new(field_access, identifier, arguments)
 }
 
 #[must_use]
 #[invariant(cursor.node().kind() == "argument_list")]
-pub fn handle_argument_list(cursor: &mut TreeCursor, code: &str) -> Arguments {
+pub fn handle_argument_list(cursor: &mut TreeCursor, code: &str) -> ir::Arguments {
     let argument_list = cursor.node();
     assert!(argument_list.next_sibling().is_none());
     assert_eq!(argument_list.child_count(), 3);

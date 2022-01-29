@@ -1,10 +1,10 @@
-use crate::ir::block::Block;
+use crate::ir;
 use crate::java::expressions::handle_expression_statement;
 use tree_sitter::TreeCursor;
 
 #[must_use]
 #[invariant(cursor.node().kind() == "block")]
-pub fn handle_block(cursor: &mut TreeCursor, code: &str) -> Block {
+pub fn handle_block(cursor: &mut TreeCursor, code: &str) -> ir::Block {
     let block = cursor.node();
     assert!(block.next_sibling().is_none());
     assert_eq!(block.child_count(), 3);

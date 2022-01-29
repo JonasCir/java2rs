@@ -1,4 +1,4 @@
-use crate::ir::r#type::ScalarType;
+use crate::ir;
 use crate::java::utils::text;
 use tree_sitter::Node;
 
@@ -17,8 +17,8 @@ pub fn handle_identifier(identifier: &Node, code: &str) -> String {
 
 #[must_use]
 #[requires(type_identifier.kind() == "type_identifier" && type_identifier.child_count() == 0)]
-#[ensures(ret == ScalarType::String)]
-pub fn handle_type_identifier(type_identifier: &Node, code: &str) -> ScalarType {
+#[ensures(ret == ir::ScalarType::String)]
+pub fn handle_type_identifier(type_identifier: &Node, code: &str) -> ir::ScalarType {
     assert_eq!(type_identifier.next_sibling().unwrap().kind(), "dimensions");
     text(type_identifier, code).parse().unwrap()
 }

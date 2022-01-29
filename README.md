@@ -8,7 +8,8 @@ Java parsing -> IR -> Rust code generation.
 
 ## Java parsing
 
-Java parsing is done with [tree-sitter-java](https://github.com/tree-sitter/tree-sitter-java).
+Java parsing is done with [tree-sitter-java](https://github.com/tree-sitter/tree-sitter-java). Find the
+grammar [here](https://github.com/tree-sitter/tree-sitter-java/blob/master/grammar.js).
 
 ## IR
 
