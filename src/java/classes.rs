@@ -1,5 +1,6 @@
 use crate::ir;
 
+use crate::ir::Modifier;
 use crate::java::expressions::handle_expression_statement;
 use crate::java::identifiers::handle_identifier;
 use crate::java::methods::{handle_formal_parameters, handle_method_declaration};
@@ -11,12 +12,17 @@ use tree_sitter::{Node, TreeCursor};
 pub fn handle_class_declaration(cursor: &mut TreeCursor, code: &str) -> ir::Class {
     let class_declaration = cursor.node();
     assert!(class_declaration.next_sibling().is_none());
-    assert_eq!(class_declaration.child_count(), 4);
 
     assert!(cursor.goto_first_child());
-    let modifiers = handle_modifiers(cursor);
 
-    assert!(cursor.goto_next_sibling());
+    let modifiers = if cursor.node().kind() == "modifiers" {
+        let modifiers = handle_modifiers(cursor);
+        assert!(cursor.goto_next_sibling());
+        modifiers
+    } else {
+        Modifier::empty()
+    };
+
     // just eat the class token
     handle_class(&cursor.node());
 

@@ -10,9 +10,8 @@ pub struct MethodDeclarations {
 
 impl MethodDeclarations {
     pub fn new() -> Self {
-        MethodDeclarations {
+        Self {
             methods: Vec::new(),
-
             functions: Vec::new(),
         }
     }
@@ -27,7 +26,6 @@ impl MethodDeclarations {
 
     pub fn methods_to_rust(&self) -> proc_macro2::TokenStream {
         let methods: Vec<_> = self.methods.iter().map(RustCodegen::to_rust).collect();
-
         quote! {
             #(#methods);*
         }
@@ -35,7 +33,6 @@ impl MethodDeclarations {
 
     pub fn functions_to_rust(&self) -> proc_macro2::TokenStream {
         let methods: Vec<_> = self.functions.iter().map(RustCodegen::to_rust).collect();
-
         quote! {
             #(#methods);*
         }
@@ -146,25 +143,14 @@ impl MethodInvocation {
 impl RustCodegen for MethodInvocation {
     fn to_rust(&self) -> TokenStream {
         assert!(self.is_println());
-        //  if self.is_println() {
         assert_eq!(self.arguments.len(), 1);
 
         let arg: syn::LitStr = syn::parse_str(self.arguments.get(0).unwrap())
-            .expect("Unable to parse println1 argument");
-        {
-            quote! {
-                println!(#arg)
-            }
-        }
+            .expect("Unable to parse println!() argument");
 
-        /*} else {
-            self.field_access.to_owned()
-                + "."
-                + &self.method_name
-                + "("
-                + &self.arguments.join(",")
-                + ")"
-        }*/
+        quote! {
+            println!(#arg)
+        }
     }
 }
 
