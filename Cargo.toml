@@ -23,5 +23,7 @@ contracts = "0.6.2"
 # Convinient working with enums
 strum = { version = "0.23", features = ["derive"] }
 
+
 [dev-dependencies]
+# Colorful diff in tests
 pretty_assertions = "1.0.0"

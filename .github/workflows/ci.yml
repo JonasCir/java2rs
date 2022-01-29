@@ -22,6 +22,7 @@ jobs:
           components: clippy, rustfmt
           override: true
 
+      # https://github.com/actions/cache/blob/main/examples.md#rust---cargo
       - name: Build cache
         uses: actions/cache@v2
         with:
@@ -29,9 +30,8 @@ jobs:
             ~/.cargo/bin/
             ~/.cargo/registry/
             ~/.cargo/git/
-            Cargo.lock
             target/
-          key: ${{ runner.os }}-cargo-${{ env.TOOLCHAIN_CHANNEL }}
+          key: ${{ runner.os }}-cargo-${{ env.TOOLCHAIN_CHANNEL }}-${{ hashFiles('**/Cargo.toml') }}
 
       - name: Run cargo build
         uses: actions-rs/cargo@v1
