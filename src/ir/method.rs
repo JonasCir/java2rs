@@ -78,18 +78,6 @@ impl MethodDeclaration {
                     ty: Type::Array(ArrayType::new(ScalarType::String, Dimensions::empty())),
                 }
     }
-
-    pub fn parameters(&self) -> &Vec<Parameter> {
-        &self.parameters
-    }
-
-    pub fn body_block(&self) -> &Block {
-        &self.body_block
-    }
-
-    pub fn modifier(&self) -> &Modifier {
-        &self.modifier
-    }
 }
 
 impl RustCodegen for MethodDeclaration {

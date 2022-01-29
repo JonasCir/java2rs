@@ -1,7 +1,7 @@
 use crate::codegen::RustCodegen;
-use crate::ir::method::{MethodDeclaration, MethodDeclarations};
+use crate::ir::method::MethodDeclarations;
 use crate::ir::modifier::Modifier;
-use crate::ir::{Block, Parameter, Statements, Type};
+use crate::ir::{Parameter, Statements};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
@@ -73,7 +73,6 @@ impl ClassBody {
 }
 
 pub struct Constructor {
-    name: String,
     modifier: Modifier,
     parameters: Vec<Parameter>,
     body_block: ConstructorBody,
@@ -81,22 +80,17 @@ pub struct Constructor {
 
 impl Constructor {
     pub fn new(
-        name: String,
         modifier: Modifier,
         parameters: Vec<Parameter>,
         body_block: ConstructorBody,
     ) -> Self {
         Constructor {
-            name,
             modifier,
             parameters,
             body_block,
         }
     }
 
-    pub fn name(&self) -> &str {
-        &self.name
-    }
     pub fn modifier(&self) -> &Modifier {
         &self.modifier
     }

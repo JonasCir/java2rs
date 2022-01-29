@@ -1,5 +1,4 @@
 use crate::ir;
-use std::assert_matches::assert_matches;
 use tree_sitter::{Node, TreeCursor};
 
 #[must_use]

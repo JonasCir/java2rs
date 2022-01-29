@@ -6,7 +6,6 @@ use crate::java::identifiers::*;
 use crate::java::literals::handle_string_literal;
 use crate::java::modifiers::handle_modifiers;
 use crate::java::types::*;
-use crate::java::utils::{print_siblings, text_print};
 use tree_sitter::TreeCursor;
 
 #[must_use]

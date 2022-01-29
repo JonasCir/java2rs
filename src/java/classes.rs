@@ -77,7 +77,7 @@ pub fn handle_constructor_declaration(cursor: &mut TreeCursor, code: &str) -> ir
     let modifier = handle_modifiers(cursor);
 
     assert!(cursor.goto_next_sibling());
-    let method_name = handle_identifier(&cursor.node(), code);
+    let _ = handle_identifier(&cursor.node(), code);
 
     assert!(cursor.goto_next_sibling());
     let parameters = handle_formal_parameters(cursor, code);
@@ -87,7 +87,7 @@ pub fn handle_constructor_declaration(cursor: &mut TreeCursor, code: &str) -> ir
 
     assert!(cursor.goto_parent());
 
-    ir::Constructor::new(method_name, modifier, parameters, constructor_body)
+    ir::Constructor::new(modifier, parameters, constructor_body)
 }
 
 #[must_use]
