@@ -9,9 +9,15 @@ pub struct Modifier {
 
 impl Modifier {
     pub fn new(visibility: Visibility, static_access: StaticAccess) -> Self {
-        Modifier {
+        Self {
             visibility,
             static_access: static_access.into(),
+        }
+    }
+    pub fn empty() -> Self {
+        Self {
+            visibility: Visibility::Default,
+            static_access: false,
         }
     }
 
@@ -30,6 +36,7 @@ impl RustCodegen for Modifier {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Visibility {
+    Default,
     Public,
 }
 
@@ -37,6 +44,7 @@ impl RustCodegen for Visibility {
     fn to_rust(&self) -> TokenStream {
         match self {
             Visibility::Public => quote! {pub},
+            _ => todo!("Not sure yet what default visibility is in Rust"),
         }
     }
 }

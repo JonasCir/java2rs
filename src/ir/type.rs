@@ -1,4 +1,5 @@
 use std::str::FromStr;
+use strum::EnumString;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Type {

@@ -3,8 +3,6 @@
 
 #[macro_use]
 extern crate contracts;
-#[macro_use]
-extern crate strum;
 
 mod codegen;
 mod ir;
@@ -23,7 +21,6 @@ pub fn process(java_code: &str) -> String {
 fn generate_rust_code(java_code: &str, cursor: &mut TreeCursor) -> String {
     let res = java::handle_program(cursor, java_code);
     let rust_code = res.to_rust();
-    println!("{rust_code}");
     let syntax_tree = syn::parse_file(&rust_code.to_string()).unwrap();
     prettyplease::unparse(&syntax_tree)
 }
