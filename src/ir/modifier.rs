@@ -1,5 +1,7 @@
 use crate::codegen::RustCodegen;
 use proc_macro2::TokenStream;
+use quote::quote;
+
 pub struct Modifier {
     visibility: Visibility,
     static_access: bool,
@@ -33,10 +35,9 @@ pub enum Visibility {
 
 impl RustCodegen for Visibility {
     fn to_rust(&self) -> TokenStream {
-        /*match self {
-            Visibility::Public => "pub".to_string(),
-        }*/
-        todo!()
+        match self {
+            Visibility::Public => quote! {pub},
+        }
     }
 }
 #[derive(Debug, Eq, PartialEq)]

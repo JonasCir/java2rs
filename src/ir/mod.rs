@@ -1,8 +1,17 @@
-pub mod block;
-pub mod class;
-pub mod expression;
-pub mod method;
-pub mod modifier;
-pub mod program;
-pub mod statement;
-pub mod r#type;
+mod block;
+mod class;
+mod expression;
+mod method;
+mod modifier;
+mod program;
+mod statement;
+mod r#type;
+
+pub use block::*;
+pub use class::*;
+pub use expression::*;
+pub use method::*;
+pub use modifier::*;
+pub use program::*;
+pub use r#type::*;
+pub use statement::*;

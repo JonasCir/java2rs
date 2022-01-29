@@ -1,13 +1,15 @@
-pub mod blocks;
-pub mod classes;
-pub mod expressions;
-pub mod fields;
-pub mod identifiers;
-pub mod literals;
-pub mod methods;
-pub mod modifiers;
-pub mod programs;
-pub mod types;
+mod blocks;
+mod classes;
+mod expressions;
+mod fields;
+mod identifiers;
+mod literals;
+mod methods;
+mod modifiers;
+mod programs;
+mod types;
+
+pub use programs::handle_program;
 
 pub mod utils {
     use tree_sitter::{Node, TreeCursor};

@@ -1,20 +1,20 @@
-use crate::ir::r#type::{ArrayType, Dimensions, ScalarType};
+use crate::ir;
 use crate::java::identifiers::handle_type_identifier;
 use crate::java::utils::text;
 use tree_sitter::{Node, TreeCursor};
 
 #[must_use]
 #[requires(void_type.kind() == "void_type")]
-#[ensures(ret == ScalarType::Void)]
-pub fn handle_void_type(void_type: &Node) -> ScalarType {
+#[ensures(ret == ir::ScalarType::Void)]
+pub fn handle_void_type(void_type: &Node) -> ir::ScalarType {
     assert_eq!(void_type.next_sibling().unwrap().kind(), "identifier");
-    ScalarType::Void
+    ir::ScalarType::Void
 }
 
 #[must_use]
 #[requires(dimensions.kind() == "dimensions")]
 #[ensures(ret.start() == 0 && ret.end() == 0)]
-pub fn handle_dimensions(dimensions: &Node, code: &str) -> Dimensions {
+pub fn handle_dimensions(dimensions: &Node, code: &str) -> ir::Dimensions {
     assert!(dimensions.next_sibling().is_none());
     assert_eq!(dimensions.child_count(), 2);
     assert_eq!(dimensions.named_child_count(), 0);
@@ -22,7 +22,7 @@ pub fn handle_dimensions(dimensions: &Node, code: &str) -> Dimensions {
 }
 
 #[must_use]
-pub fn handle_array_type(cursor: &mut TreeCursor, code: &str) -> ArrayType {
+pub fn handle_array_type(cursor: &mut TreeCursor, code: &str) -> ir::ArrayType {
     let array_type = cursor.node();
     assert_eq!(array_type.kind(), "array_type");
     assert_eq!(
@@ -40,5 +40,5 @@ pub fn handle_array_type(cursor: &mut TreeCursor, code: &str) -> ArrayType {
     assert!(cursor.goto_parent());
     assert_eq!(cursor.node().kind(), "array_type");
 
-    ArrayType::new(type_identifier, dimensions)
+    ir::ArrayType::new(type_identifier, dimensions)
 }

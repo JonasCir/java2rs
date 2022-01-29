@@ -1,10 +1,46 @@
 use crate::codegen::RustCodegen;
-use crate::ir::block::Block;
-use crate::ir::modifier::Modifier;
-use crate::ir::modifier::Visibility;
-use crate::ir::r#type::{ArrayType, Dimensions, ScalarType, Type};
+use crate::ir::*;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
+
+pub struct MethodDeclarations {
+    methods: Vec<MethodDeclaration>,
+    functions: Vec<MethodDeclaration>,
+}
+
+impl MethodDeclarations {
+    pub fn new() -> Self {
+        MethodDeclarations {
+            methods: Vec::new(),
+
+            functions: Vec::new(),
+        }
+    }
+
+    pub fn add_method(&mut self, method: MethodDeclaration) {
+        if method.is_main() {
+            self.functions.push(method)
+        } else {
+            self.methods.push(method)
+        }
+    }
+
+    pub fn methods_to_rust(&self) -> proc_macro2::TokenStream {
+        let methods: Vec<_> = self.methods.iter().map(RustCodegen::to_rust).collect();
+
+        quote! {
+            #(#methods);*
+        }
+    }
+
+    pub fn functions_to_rust(&self) -> proc_macro2::TokenStream {
+        let methods: Vec<_> = self.functions.iter().map(RustCodegen::to_rust).collect();
+
+        quote! {
+            #(#methods);*
+        }
+    }
+}
 
 pub struct MethodDeclaration {
     name: String,
@@ -46,22 +82,26 @@ impl MethodDeclaration {
 
 impl RustCodegen for MethodDeclaration {
     fn to_rust(&self) -> TokenStream {
-        assert!(self.modifier.static_access());
-        assert_eq!(self.parameters.len(), 1);
-        assert!(self.is_main());
-        assert_eq!(self.parameters.len(), 1);
         let name = format_ident!("{}", &self.name);
-        //let parameters = self.parameters.get(0).unwrap().to_rust();
         let body_block = self.body_block.to_rust();
+
         if self.is_main() {
-            return quote! {
+            quote! {
+                fn main()
+                    #body_block
+            }
+        } else {
+            assert!(self.parameters.is_empty());
+
+            quote! {
                 fn #name()
                     #body_block
-            };
+            }
         }
-        todo!()
     }
 }
+
+pub type Parameters = Vec<Parameter>;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Parameter {

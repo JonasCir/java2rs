@@ -1,13 +1,14 @@
-use crate::ir::class::Class;
-use crate::ir::method::MethodDeclaration;
+use crate::ir;
+
+use crate::java::expressions::handle_expression_statement;
 use crate::java::identifiers::handle_identifier;
-use crate::java::methods::handle_method_declaration;
+use crate::java::methods::{handle_formal_parameters, handle_method_declaration};
 use crate::java::modifiers::*;
 use tree_sitter::{Node, TreeCursor};
 
 #[must_use]
 #[invariant(cursor.node().kind() == "class_declaration")]
-pub fn handle_class_declaration(cursor: &mut TreeCursor, code: &str) -> Class {
+pub fn handle_class_declaration(cursor: &mut TreeCursor, code: &str) -> ir::Class {
     let class_declaration = cursor.node();
     assert!(class_declaration.next_sibling().is_none());
     assert_eq!(class_declaration.child_count(), 4);
@@ -23,10 +24,10 @@ pub fn handle_class_declaration(cursor: &mut TreeCursor, code: &str) -> Class {
     let class_name = handle_identifier(&cursor.node(), code);
 
     assert!(cursor.goto_next_sibling());
-    let (methods, static_methods) = handle_class_body(cursor, code);
+    let method_declarations = handle_class_body(cursor, code);
 
     assert!(cursor.goto_parent());
-    Class::new(class_name, modifiers, methods, static_methods)
+    ir::Class::new(class_name, modifiers, method_declarations)
 }
 
 pub fn handle_class(class: &Node) {
@@ -37,30 +38,74 @@ pub fn handle_class(class: &Node) {
 
 #[must_use]
 #[invariant(cursor.node().kind() == "class_body")]
-pub fn handle_class_body(
-    cursor: &mut TreeCursor,
-    code: &str,
-) -> (Vec<MethodDeclaration>, Vec<MethodDeclaration>) {
-    let class_body = cursor.node();
-    assert!(class_body.next_sibling().is_none());
-    assert_eq!(class_body.child_count(), 3);
-    assert_eq!(class_body.named_child_count(), 1);
-
+pub fn handle_class_body(cursor: &mut TreeCursor, code: &str) -> ir::ClassBody {
     // skip the unnamed children "{" and "}" which wrap the class body
     assert!(cursor.goto_first_child());
     assert_eq!(cursor.node().kind(), "{");
 
     assert!(cursor.goto_next_sibling());
-    let method_decl = handle_method_declaration(cursor, code);
+
+    let mut method_declarations = ir::MethodDeclarations::new();
+    let mut constructor_declaration: Option<ir::Constructor> = None;
+
+    while cursor.node().kind() != "}" {
+        match cursor.node().kind() {
+            "method_declaration" => {
+                method_declarations.add_method(handle_method_declaration(cursor, code));
+            }
+            "constructor_declaration" => {
+                constructor_declaration = Some(handle_constructor_declaration(cursor, code));
+            }
+            _ => {
+                unimplemented!()
+            }
+        }
+        assert!(cursor.goto_next_sibling());
+    }
+
+    assert!(cursor.goto_parent());
+    ir::ClassBody::new(constructor_declaration, method_declarations)
+}
+
+#[must_use]
+#[invariant(cursor.node().kind() == "constructor_declaration")]
+pub fn handle_constructor_declaration(cursor: &mut TreeCursor, code: &str) -> ir::Constructor {
+    let constructor_declaration = cursor.node();
+    assert_eq!(constructor_declaration.child_count(), 4);
+
+    assert!(cursor.goto_first_child());
+    let modifier = handle_modifiers(cursor);
 
     assert!(cursor.goto_next_sibling());
-    assert_eq!(cursor.node().kind(), "}");
+    let _ = handle_identifier(&cursor.node(), code);
+
+    assert!(cursor.goto_next_sibling());
+    let parameters = handle_formal_parameters(cursor, code);
+
+    assert!(cursor.goto_next_sibling());
+    let constructor_body = handle_constructor_body(cursor, code);
 
     assert!(cursor.goto_parent());
 
-    // static methods need to be moved out of the class to dedicated impl block, so create a tuple for
-    // static and member functions
-    let methods = vec![];
-    let static_methods = vec![method_decl];
-    (methods, static_methods)
+    ir::Constructor::new(modifier, parameters, constructor_body)
+}
+
+#[must_use]
+#[invariant(cursor.node().kind() == "constructor_body")]
+pub fn handle_constructor_body(cursor: &mut TreeCursor, code: &str) -> ir::ConstructorBody {
+    // skip the unnamed children "{" and "}" which wrap the class body
+    assert!(cursor.goto_first_child());
+    assert_eq!(cursor.node().kind(), "{");
+
+    assert!(cursor.goto_next_sibling());
+
+    let mut statements = ir::Statements::new();
+    while cursor.node().kind() != "}" {
+        let statement = handle_expression_statement(cursor, code);
+        statements.push(statement);
+        assert!(cursor.goto_next_sibling());
+    }
+
+    assert!(cursor.goto_parent());
+    ir::ConstructorBody::new(statements)
 }
